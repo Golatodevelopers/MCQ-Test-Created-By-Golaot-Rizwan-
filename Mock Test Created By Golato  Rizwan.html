@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCQ Test - 100 Questions</title>
+<style>
+  :root{
+    --bg:#f4f6fb;
+    --card:#ffffff;
+    --ink:#1c2333;
+    --muted:#5b6478;
+    --accent:#3454d1;
+    --accent-dark:#243a9c;
+    --correct:#1e9e5a;
+    --correct-bg:#e6f7ee;
+    --wrong:#d64545;
+    --wrong-bg:#fdeaea;
+    --border:#e2e6f0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding:24px 12px 80px;
+  }
+  .wrap{max-width:820px;margin:0 auto;}
+  header{
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    color:#fff;
+    border-radius:14px;
+    padding:28px 24px;
+    margin-bottom:24px;
+    box-shadow:0 8px 24px rgba(52,84,209,0.25);
+  }
+  header h1{margin:0 0 6px;font-size:1.6rem;}
+  header p{margin:0;opacity:0.9;font-size:0.95rem;}
+  .section-title{
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--accent-dark);
+    margin:32px 0 14px;
+    padding-bottom:6px;
+    border-bottom:2px solid var(--accent);
+  }
+  .qcard{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:14px;
+    transition:box-shadow .2s;
+  }
+  .qcard:hover{box-shadow:0 4px 14px rgba(28,35,51,0.06);}
+  .qtext{font-weight:600;margin-bottom:12px;line-height:1.4;}
+  .qnum{color:var(--accent);margin-right:6px;}
+  .options{display:flex;flex-direction:column;gap:8px;}
+  .option{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    cursor:pointer;
+    transition:background .15s, border-color .15s;
+  }
+  .option:hover{background:#f0f3fc;}
+  .option input{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;}
+  .option.correct{background:var(--correct-bg);border-color:var(--correct);}
+  .option.wrong{background:var(--wrong-bg);border-color:var(--wrong);}
+  .option .tag{margin-left:auto;font-size:0.78rem;font-weight:700;}
+  .option.correct .tag{color:var(--correct);}
+  .option.wrong .tag{color:var(--wrong);}
+  .qcard.answered .option{cursor:default;pointer-events:none;}
+  .qcard.answered .option:hover{background:none;}
+
+  .submit-bar{
+    position:sticky;
+    bottom:0;
+    background:var(--bg);
+    padding:16px 0 4px;
+    display:flex;
+    justify-content:center;
+  }
+  #submitBtn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:14px 40px;
+    font-size:1.05rem;
+    font-weight:700;
+    border-radius:30px;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(52,84,209,0.35);
+    transition:background .2s, transform .1s;
+  }
+  #submitBtn:hover{background:var(--accent-dark);}
+  #submitBtn:active{transform:scale(0.98);}
+  #submitBtn:disabled{background:#a9b3cc;cursor:not-allowed;box-shadow:none;}
+
+  #resultBanner{
+    display:none;
+    background:var(--card);
+    border:2px solid var(--accent);
+    border-radius:14px;
+    padding:22px;
+    text-align:center;
+    margin-bottom:24px;
+  }
+  #resultBanner h2{margin:0 0 6px;color:var(--accent-dark);}
+  #resultBanner .score{font-size:2.2rem;font-weight:800;color:var(--accent);}
+  #resultBanner .percentage{font-size:1.3rem;font-weight:700;color:var(--correct);margin-top:2px;}
+  #resultBanner .sub{color:var(--muted);font-size:0.9rem;margin-top:4px;}
+
+  .info-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;
+  }
+  .info-field{display:flex;flex-direction:column;gap:6px;}
+  .info-field label{font-size:0.85rem;font-weight:600;color:var(--muted);}
+  .info-field input{
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:0.95rem;
+    font-family:inherit;
+  }
+  .info-field input:focus{outline:2px solid var(--accent);border-color:var(--accent);}
+  #progressNote{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.9rem;
+    margin-bottom:8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MCQ Test — 100 Questions</h1>
+    <p>Computer • English • General Knowledge • Mathematics — Select one option per question. Answers are checked automatically as you go.</p>
+  </header>
+
+  <div class="qcard" id="candidateInfo" style="border:2px solid var(--accent);background:#f0f3fc;">
+    <div class="qtext" style="margin-bottom:14px;color:var(--accent-dark);font-size:1.05rem;">📝 Candidate Details (please fill before starting)</div>
+    <div class="info-grid">
+      <div class="info-field">
+        <label for="candName">Name</label>
+        <input type="text" id="candName" placeholder="Enter your name">
+      </div>
+      <div class="info-field">
+        <label for="candClass">Class</label>
+        <input type="text" id="candClass" placeholder="Enter your class">
+      </div>
+      <div class="info-field">
+        <label for="candCity">City</label>
+        <input type="text" id="candCity" placeholder="Enter your city">
+      </div>
+    </div>
+  </div>
+
+  <p id="progressNote">Answered: <span id="answeredCount">0</span> / 100</p>
+
+  <div id="resultBanner">
+    <h2>Test Completed</h2>
+    <div class="score" id="scoreText">0 / 100</div>
+    <div class="percentage" id="percentageText"></div>
+    <div class="sub" id="scoreSub"></div>
+    <div class="sub" id="candSummary" style="margin-top:10px;font-weight:700;font-size:1rem;color:var(--ink);"></div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-bar">
+    <button id="submitBtn" disabled>Submit Test</button>
+  </div>
+</div>
+
+<script>
+const sections = [
+  {name:"Computer", questions:[
+    ["What does CPU stand for?",["Central Process Unit","Central Processing Unit","Computer Processing Unit","Central Processor Unit"],1],
+    ["What does RAM stand for?",["Random Access Memory","Read Access Memory","Random Active Memory","Read Active Memory"],0],
+    ["What does ROM stand for?",["Read Only Memory","Random Only Memory","Read Open Memory","Random Open Memory"],0],
+    ["Which part of the CPU performs calculations and logic operations?",["Control Unit","ALU","Register","Cache"],1],
+    ["Which part of the CPU controls and coordinates all computer operations?",["ALU","RAM","Control Unit","ROM"],2],
+    ["Which memory is temporary and lost when the computer is off?",["ROM","RAM","Hard Disk","USB"],1],
+    ["Which memory is permanent and non-volatile?",["RAM","Cache","ROM","Register"],2],
+    ["Which storage device stores data permanently?",["RAM","Cache","Hard Disk","Register"],2],
+    ["What is the smallest unit of data in a computer?",["Byte","Bit","KB","MB"],1],
+    ["1024 Bytes are equal to:",["1 Bit","1 KB","1 MB","1 GB"],1],
+    ["Which company developed the Windows operating system?",["Apple","Microsoft","Google","IBM"],1],
+    ["Which shortcut key is used to copy text?",["Ctrl + V","Ctrl + C","Ctrl + X","Ctrl + Z"],1],
+    ["Which shortcut key is used to paste text?",["Ctrl + C","Ctrl + V","Ctrl + X","Ctrl + P"],1],
+    ["Which shortcut key is used to save a file?",["Ctrl + O","Ctrl + N","Ctrl + S","Ctrl + P"],2],
+    ["Which software is used for calculations and spreadsheets?",["MS Word","MS Excel","MS PowerPoint","MS Access"],1],
+    ["What is the file extension of an Excel file?",[".docx",".pptx",".xlsx",".pdf"],2],
+    ["What does HTML stand for?",["HyperText Markup Language","HighText Markup Language","HyperText Machine Language","HyperText Modern Language"],0],
+    ["What does URL stand for?",["Uniform Resource Locator","Universal Resource Locator","Uniform Resource Link","Universal Resource Link"],0],
+    ["Which of these is an input device?",["Monitor","Printer","Keyboard","Speaker"],2],
+    ["Which of these is an output device?",["Scanner","Mouse","Keyboard","Printer"],3],
+    ["What is a computer virus?",["Useful Software","Malicious Software","Hardware Part","Operating System"],1],
+    ["Where do deleted files first go on a Windows computer?",["Trash","Recycle Bin","Storage","Cloud"],1],
+    ["Which key is used to rename a file?",["F1","F2","F5","F10"],1],
+    ["Which key opens the Help menu?",["F1","F2","F5","F12"],0],
+    ["Which browser is developed by Microsoft?",["Chrome","Safari","Edge","Firefox"],2]
+  ]},
+  {name:"English", questions:[
+    ["What is the synonym of \"Happy\"?",["Sad","Joyful","Angry","Tired"],1],
+    ["What is the antonym of \"Hot\"?",["Warm","Cold","Sunny","Boiling"],1],
+    ["What is the plural of \"Child\"?",["Childs","Childrens","Children","Childes"],2],
+    ["What is the past tense of \"Go\"?",["Goed","Gone","Went","Going"],2],
+    ["Choose the correct sentence:",["She go to school every day.","She goes to school every day.","She going to school every day.","She gone to school every day."],1],
+    ["Fill in the blank: They ___ playing football.",["is","am","are","be"],2],
+    ["Choose the correct article: \"___ apple\"",["A","An","The","No article"],1],
+    ["Which word is a noun?",["Jump","Quickly","Book","Under"],2],
+    ["Which word is a verb?",["Jump","Beautiful","Book","Slowly"],0],
+    ["What is the opposite of \"Rich\"?",["Poor","Wealthy","Happy","Big"],0],
+    ["What is the synonym of \"Begin\"?",["End","Start","Stop","Finish"],1],
+    ["What is the opposite of \"Early\"?",["Fast","Late","Soon","Quick"],1],
+    ["What is the past tense of \"Write\"?",["Writed","Wrote","Written","Writing"],1],
+    ["What is the plural of \"Woman\"?",["Womans","Women","Womens","Womon"],1],
+    ["Which is a pronoun?",["He","Book","Run","Fast"],0],
+    ["Which is an adjective?",["Quickly","Beautiful","He","Between"],1],
+    ["Which is an adverb?",["Book","Quickly","He","Under"],1],
+    ["Which punctuation mark ends a question?",["Full Stop","Comma","Question Mark (?)","Exclamation Mark"],2],
+    ["What is the opposite of \"Brave\"?",["Strong","Coward","Bold","Fearless"],1],
+    ["What is the synonym of \"Honest\"?",["Dishonest","Truthful","Careless","Rude"],1],
+    ["What is the plural of \"Mouse\"?",["Mouses","Mices","Mice","Mousees"],2],
+    ["Which word is a preposition?",["Between","Because","Oh!","Quickly"],0],
+    ["Which word is a conjunction?",["Between","Because","Oh!","Quickly"],1],
+    ["Which sentence uses Passive Voice correctly?",["Ali wrote a letter.","A letter was written by Ali.","Ali is writing a letter.","Ali will write a letter."],1],
+    ["What is the comparative form of \"Good\"?",["Best","Gooder","Better","Well"],2]
+  ]},
+  {name:"General Knowledge", questions:[
+    ["What is the capital of Pakistan?",["Karachi","Lahore","Islamabad","Peshawar"],2],
+    ["What is the national language of Pakistan?",["English","Urdu","Punjabi","Pashto"],1],
+    ["Who is the founder of Pakistan?",["Allama Iqbal","Quaid-e-Azam Muhammad Ali Jinnah","Liaquat Ali Khan","Sir Syed Ahmed Khan"],1],
+    ["When did Pakistan become independent?",["23 March 1940","14 August 1947","14 August 1950","6 September 1965"],1],
+    ["What is the national animal of Pakistan?",["Lion","Markhor","Deer","Leopard"],1],
+    ["Which is the largest province of Pakistan by area?",["Punjab","Sindh","Balochistan","Khyber Pakhtunkhwa"],2],
+    ["Which is the largest city of Pakistan?",["Lahore","Islamabad","Karachi","Quetta"],2],
+    ["Which river is the longest in Pakistan?",["Jhelum River","Chenab River","Indus River","Ravi River"],2],
+    ["Which mountain is the highest in Pakistan?",["Nanga Parbat","K2","Everest","Rakaposhi"],1],
+    ["What is the currency of Pakistan?",["Dollar","Rupee","Dinar","Riyal"],1],
+    ["What is the national sport of Pakistan?",["Cricket","Football","Field Hockey","Squash"],2],
+    ["Which country is called the \"Land of the Rising Sun\"?",["China","Japan","Korea","India"],1],
+    ["Which is the largest continent?",["Africa","Asia","Europe","Australia"],1],
+    ["Which is the largest ocean in the world?",["Atlantic Ocean","Indian Ocean","Pacific Ocean","Arctic Ocean"],2],
+    ["Which planet is known as the Red Planet?",["Earth","Venus","Mars","Jupiter"],2],
+    ["Which planet is the largest in the Solar System?",["Earth","Saturn","Jupiter","Neptune"],2],
+    ["Which is the natural satellite of Earth?",["Sun","Mars","Moon","Star"],2],
+    ["Who invented the telephone?",["Thomas Edison","Alexander Graham Bell","Tim Berners-Lee","Charles Babbage"],1],
+    ["Who invented the light bulb?",["Alexander Graham Bell","Thomas Edison","Tim Berners-Lee","Wright Brothers"],1],
+    ["What is the largest mammal in the world?",["Elephant","Blue Whale","Giraffe","Shark"],1],
+    ["Which animal is known as the \"King of the Jungle\"?",["Tiger","Lion","Elephant","Leopard"],1],
+    ["What is the capital of France?",["Berlin","Rome","Paris","Madrid"],2],
+    ["What is the capital of China?",["Beijing","Shanghai","Hong Kong","Tokyo"],0],
+    ["How many continents are there?",["5","6","7","8"],2],
+    ["How many colours are in a rainbow?",["5","6","7","8"],2]
+  ]},
+  {name:"Mathematics", questions:[
+    ["What is 10% of 100?",["5","10","15","20"],1],
+    ["What is 15% of 240?",["30","36","42","24"],1],
+    ["What is the sum of 25 + 35?",["50","55","60","65"],2],
+    ["What is 12 × 5?",["50","55","60","65"],2],
+    ["What is 100 ÷ 10?",["5","10","15","20"],1],
+    ["Simplify: 7/9 − 2/9",["4/9","5/9","6/9","9/9"],1],
+    ["Simplify: 3/4 + 5/8",["8/12","11/8","9/8","1"],1],
+    ["What is the square of 5?",["10","15","20","25"],3],
+    ["What is √25?",["3","4","5","6"],2],
+    ["Find the HCF of 24 and 36.",["6","8","12","18"],2],
+    ["Find the LCM of 15 and 20.",["30","45","60","90"],2],
+    ["Find the average of 18, 22, 30, and 40.",["25","27.5","30","32.5"],1],
+    ["If Cost Price = Rs. 500 and Selling Price = Rs. 600, find the profit percentage.",["10%","15%","20%","25%"],2],
+    ["Find Simple Interest on Rs. 1000 at 5% for 2 years.",["Rs. 50","Rs. 100","Rs. 150","Rs. 200"],1],
+    ["Find the perimeter of a square with side 10 cm.",["20 cm","30 cm","40 cm","50 cm"],2],
+    ["Find the area of a rectangle with length 20 cm and width 8 cm.",["28 cm²","56 cm²","160 cm²","200 cm²"],2],
+    ["A train travels 360 km in 6 hours. Find its speed.",["40 km/h","50 km/h","60 km/h","70 km/h"],2],
+    ["What is 0.5 as a fraction?",["1/2","1/4","3/4","2/3"],0],
+    ["If the ratio of boys to girls is 4:3 and there are 28 boys, how many girls are there?",["18","21","24","27"],1],
+    ["Find the next number in the series: 2, 6, 18, 54, __",["108","144","162","216"],2],
+    ["What is the smallest prime number?",["0","1","2","3"],2],
+    ["How many days are there in a week?",["5","6","7","8"],2],
+    ["How many months are in 3 years?",["24","30","36","40"],2],
+    ["What is the value of π (approx.)?",["2.14","3.14","4.14","1.14"],1],
+    ["Find the area of a triangle with base 12 cm and height 8 cm.",["40 cm²","48 cm²","96 cm²","60 cm²"],1]
+  ]}
+];
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submitBtn');
+const answeredCountEl = document.getElementById('answeredCount');
+let totalQuestions = 0;
+let answered = {};
+
+let qGlobal = 0;
+sections.forEach(sec => {
+  const title = document.createElement('div');
+  title.className = 'section-title';
+  title.textContent = sec.name;
+  quizEl.appendChild(title);
+
+  sec.questions.forEach(q => {
+    qGlobal++;
+    totalQuestions++;
+    const qId = qGlobal;
+    const [text, opts, correctIdx] = q;
+
+    const card = document.createElement('div');
+    card.className = 'qcard';
+    card.id = 'q' + qId;
+
+    const qt = document.createElement('div');
+    qt.className = 'qtext';
+    qt.innerHTML = '<span class="qnum">' + qId + '.</span>' + text;
+    card.appendChild(qt);
+
+    const optsWrap = document.createElement('div');
+    optsWrap.className = 'options';
+
+    opts.forEach((optText, i) => {
+      const label = document.createElement('label');
+      label.className = 'option';
+      label.id = 'q' + qId + 'o' + i;
+
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'q' + qId;
+      input.value = i;
+
+      input.addEventListener('change', () => {
+        answered[qId] = i;
+        answeredCountEl.textContent = Object.keys(answered).length;
+        submitBtn.disabled = Object.keys(answered).length === 0;
+
+        // Instant feedback for this question
+        const correctIdx = parseInt(card.dataset.correct);
+        card.classList.add('answered');
+        document.getElementsByName('q' + qId).forEach(r => r.disabled = true);
+
+        const correctLabel = document.getElementById('q' + qId + 'o' + correctIdx);
+        if (!correctLabel.querySelector('.tag')) {
+          correctLabel.classList.add('correct');
+          const tagC = document.createElement('span');
+          tagC.className = 'tag';
+          tagC.textContent = '✓ Correct';
+          correctLabel.appendChild(tagC);
+        }
+
+        if (i !== correctIdx) {
+          const wrongLabel = document.getElementById('q' + qId + 'o' + i);
+          wrongLabel.classList.add('wrong');
+          const tagW = document.createElement('span');
+          tagW.className = 'tag';
+          tagW.textContent = '✗ Your Answer';
+          wrongLabel.appendChild(tagW);
+        }
+      });
+
+      const span = document.createElement('span');
+      span.textContent = optText;
+
+      label.appendChild(input);
+      label.appendChild(span);
+      optsWrap.appendChild(label);
+    });
+
+    card.appendChild(optsWrap);
+    card.dataset.correct = correctIdx;
+    quizEl.appendChild(card);
+  });
+});
+
+submitBtn.addEventListener('click', () => {
+  let score = 0;
+  let qId = 0;
+  sections.forEach(sec => {
+    sec.questions.forEach(q => {
+      qId++;
+      const card = document.getElementById('q' + qId);
+      const correctIdx = parseInt(card.dataset.correct);
+      const userAns = answered[qId];
+
+      // Ensure correct/wrong marks are shown even for skipped or unmarked questions
+      card.classList.add('answered');
+      document.getElementsByName('q' + qId).forEach(r => r.disabled = true);
+      const correctLabel = document.getElementById('q' + qId + 'o' + correctIdx);
+      if (!correctLabel.querySelector('.tag')) {
+        correctLabel.classList.add('correct');
+        const tagC = document.createElement('span');
+        tagC.className = 'tag';
+        tagC.textContent = '✓ Correct';
+        correctLabel.appendChild(tagC);
+      }
+
+      if (userAns !== undefined && userAns === correctIdx) {
+        score++;
+      }
+    });
+  });
+
+  const answeredNum = Object.keys(answered).length;
+  const percentage = ((score / totalQuestions) * 100).toFixed(1);
+
+  document.getElementById('scoreText').textContent = score + ' / ' + totalQuestions;
+  document.getElementById('percentageText').textContent = percentage + '%';
+  document.getElementById('scoreSub').textContent =
+    'You answered ' + answeredNum + ' of ' + totalQuestions + ' questions. ' +
+    (totalQuestions - answeredNum > 0 ? (totalQuestions - answeredNum) + ' left unanswered.' : 'All questions attempted!');
+
+  const name = document.getElementById('candName').value.trim();
+  const cls = document.getElementById('candClass').value.trim();
+  const city = document.getElementById('candCity').value.trim();
+  const parts = [];
+  if (name) parts.push('Name: ' + name);
+  if (cls) parts.push('Class: ' + cls);
+  if (city) parts.push('City: ' + city);
+  document.getElementById('candSummary').textContent = parts.join(' | ');
+
+  document.getElementById('resultBanner').style.display = 'block';
+  document.getElementById('resultBanner').scrollIntoView({behavior:'smooth'});
+
+  submitBtn.textContent = 'Test Submitted';
+  submitBtn.disabled = true;
+});
+</script>
+</body>
+</html>
